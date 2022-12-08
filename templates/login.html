@@ -1,0 +1,23 @@
+{% extends 'bootstrap/base.html' %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='mystyle.css')}}">
+{% endblock %}
+
+{% block body %}
+<body>
+    <h1>Welcome to School University!</h1>
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        {{ form.username }}
+        <br>
+        {{ form.password }}
+        <br>
+        {{ form.submit }}
+    </form>
+    <br>
+    <a href="{{ url_for('register') }}">Don't have an account? Sign Up</a>
+
+</body>
+{% endblock %}
