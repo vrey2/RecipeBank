@@ -3,29 +3,28 @@
 {% block styles %}
 {{super()}}
 <link rel="stylesheet" href="{{url_for('.static', filename='mystyle.css')}}">
+<script src="{{url_for('static', filename='script.js')}}"></script>
 {% endblock %}
 
 {% block body %}
 <body>
 
 
-<div id="Your Courses" >
-  <h3>Your Courses</h3>
-  <h2>Hello {{teacher.name}}!</h2>
+<div>
+  <h3>Your Recipe Bank</h3>
+  <h2>Hello {{user.name}}!</h2>
   <table>
     <thead>
     <tr>
-      <th>Course</th>
-      <th>Teacher</th>
+      <th>Recipe</th>
+      <th>Serving Size</th>
       <th>Time</th>
-      <th>Students Enrolled</th>
     </tr>
-    {% for c in courses%}
+    {% for r in recipes %}
     <tr>
-      <td><a href="/courses/{{courses[c]['id']}}">{{courses[c]['cName']}}</a></td>
-      <td>{{courses[c]['tName']}}</td>
-      <td>{{courses[c]['time']}}</td>
-       <td>{{courses[c]['enrolled']}}/{{courses[c]['capacity']}}</td>
+      <td><a></a></td>
+      <td></td>
+      <td></td>
     </tr>
     {% endfor %}
   </table>
@@ -38,6 +37,6 @@
 
 </body>
 
-<script src="{{url_for('static', filename='teacher.js')}}"></script>
+
 
 {% endblock %}
