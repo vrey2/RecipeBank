@@ -60,7 +60,8 @@ class Recipe(db.Model):
     ingredients = db.Column('ingr', db.String(1000))
     instruction = db.Column('instr', db.String(1000))
     time = db.Column('time', db.String(100))
-    user = db.relationship('User', backref=db.backref('Recipe', uselist=False))
+    user_id = db.Column('user_id', db.ForeignKey('user.id'), nullable=False)
+    # author = db.relationship('User', backref=db.backref('Recipe', uselist=False))
 
 class MyModelView(ModelView):
     def is_accessible(self):
@@ -102,7 +103,7 @@ class UsrView(ModelView):
     # column_list = ['courseName', 'teacher.name', 'numEnrolled', 'capacity', 'time']
 
 
-class EnrollmentView(ModelView):
+class RecipeView(ModelView):
     def is_accessible(self):
         if (current_user.is_authenticated):
             isUser = User.query.filter_by(user_id=current_user.id).first()
@@ -112,12 +113,13 @@ class EnrollmentView(ModelView):
     def inaccessible_callback(self, name, **kwargs):
         return redirect(url_for('login'))
 
-    # column_list = ['student.name', 'courses.courseName', 'grade']
+    column_labels = {'User.username' : 'USER'}
+    column_list = ['name', 'serving', 'prep', 'cook', 'ingredients', 'instruction', 'time']
 
 
 admin.add_view(MyModelView(User, db.session))
-# # admin.add_view(MyModelView(Teacher, db.session))
-admin.add_view(UsrView(User, db.session))
+admin.add_view(RecipeView(Recipe, db.session))
+# admin.add_view(UsrView(User, db.session))
 #
 # # admin.add_view(MyModelView(Student, db.session))
 # admin.add_view(StudentView(Student, db.session))
@@ -150,10 +152,19 @@ def login():
 @app.route('/home', methods=['GET', 'POST'])
 @login_required
 def dashboard():
-    return render_template('home.html')
+    user = current_user.id
+    receta = Recipe.query.filter_by(user_id=user).first()
+    return render_template('home.html', recipes=receta)
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
+@app.route('/myrecipes', methods=['GET', 'POST'])
+@login_required
+def myRecipes():
+    user = current_user.id
+    receta = Recipe.query.filter_by(user_id=user).first()
+    return render_template('profile.html', recipes=receta)
