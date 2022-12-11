@@ -104,7 +104,7 @@ class UsrView(ModelView):
     def inaccessible_callback(self, name, **kwargs):
         return redirect(url_for('login.html'))
 
-    # column_labels = {'Teacher.Name': 'Teacher'}
+    column_labels = {'User.username' : 'User.password'}
     # column_list = ['courseName', 'teacher.name', 'numEnrolled', 'capacity', 'time']
 
 
@@ -134,6 +134,15 @@ admin.add_view(RecipeView(Recipe, db.session))
 # # admin.add_view(ModelView(Enrollment, db.session))
 # admin.add_view(EnrollmentView(Enrollment, db.session))
 
+@app.route('/', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        #user = User.query.filter_by(username=form.username.data).first()
+        return redirect(url_for('home.html'))
+            # return redirect(url_for('dashboard'))
+    return render_template('login.html', form=form)
+
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
     return redirect(url_for('admin.index'))
@@ -149,14 +158,6 @@ def register():
         return redirect(url_for('login.html'))
     return render_template('register.html', form=form)
 
-@app.route('/', methods=['GET', 'POST'])
-def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        #user = User.query.filter_by(username=form.username.data).first()
-        return redirect(url_for('home.html'))
-            # return redirect(url_for('dashboard'))
-    return render_template('login.html', form=form)
 
 @app.route('/home', methods=['GET', 'POST'])
 # @login_required
