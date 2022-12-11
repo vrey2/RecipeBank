@@ -1,9 +1,9 @@
-from flask import Flask
+from flask import Flask, url_for
 from sqlalchemy import select
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import InputRequired, Length, ValidationError
 from flask_bcrypt import Bcrypt
 from flask_bootstrap import Bootstrap
@@ -27,6 +27,7 @@ login_manager.login_view = 'login'
 with app.test_request_context():
     db.init_app(app)
     db.create_all()
+    app.run(debug=True)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -47,11 +48,12 @@ class LoginForm(FlaskForm):
     username = StringField(validators=[InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username"})
     password = PasswordField(validators=[InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Password"})
     submit = SubmitField('Login')
+    remember = BooleanField('remember me')
 
 class User(db.Model, UserMixin):
     id = db.Column('id', db.Integer, primary_key=True)
-    username = db.Column('username', db.String(100))
-    password = db.Column('password', db.String(100))
+    username = db.Column('username', db.String(20), unique=True)
+    password = db.Column('password', db.String(20))
 
 class Recipe(db.Model):
     __tablename__='Recipes'
@@ -74,7 +76,7 @@ class MyModelView(ModelView):
                 return current_user.is_authenticated
 
     def inaccessible_callback(self, name, **kwargs):
-        return redirect(url_for('login'))
+        return redirect(url_for('login.html'))
 
 
 class MyAdminIndexView(AdminIndexView):
@@ -85,7 +87,7 @@ class MyAdminIndexView(AdminIndexView):
                 return current_user.is_authenticated
 
     def inaccessible_callback(self, name, **kwargs):
-        return redirect(url_for('login'))
+        return redirect(url_for('login.html'))
 
 
 admin = Admin(app, index_view=MyAdminIndexView())
@@ -100,7 +102,7 @@ class UsrView(ModelView):
                 return current_user.is_authenticated
 
     def inaccessible_callback(self, name, **kwargs):
-        return redirect(url_for('login'))
+        return redirect(url_for('login.html'))
 
     # column_labels = {'Teacher.Name': 'Teacher'}
     # column_list = ['courseName', 'teacher.name', 'numEnrolled', 'capacity', 'time']
@@ -114,7 +116,7 @@ class RecipeView(ModelView):
                 return current_user.is_authenticated
 
     def inaccessible_callback(self, name, **kwargs):
-        return redirect(url_for('login'))
+        return redirect(url_for('login.html'))
 
     column_labels = {'User.username' : 'USER'}
     column_list = ['name', 'serving', 'prep', 'cook', 'ingredients', 'instruction', 'time']
@@ -132,6 +134,10 @@ admin.add_view(RecipeView(Recipe, db.session))
 # # admin.add_view(ModelView(Enrollment, db.session))
 # admin.add_view(EnrollmentView(Enrollment, db.session))
 
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+    return redirect(url_for('admin.index'))
+
 @ app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
@@ -140,7 +146,7 @@ def register():
         new_user = User(username=form.username.data, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
-        return redirect(url_for('login'))
+        return redirect(url_for('login.html'))
     return render_template('register.html', form=form)
 
 @app.route('/', methods=['GET', 'POST'])
@@ -148,26 +154,29 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         #user = User.query.filter_by(username=form.username.data).first()
-        return render_template('home.html')
+        return redirect(url_for('home.html'))
             # return redirect(url_for('dashboard'))
     return render_template('login.html', form=form)
 
 @app.route('/home', methods=['GET', 'POST'])
-@login_required
+# @login_required
 def dashboard():
     user = current_user.id
     receta = Recipe.query.filter_by(user_id=user).first()
     return render_template('home.html', recipes=receta)
 
 @app.route('/logout', methods=['GET', 'POST'])
-@login_required
+# @login_required
 def logout():
     logout_user()
     return redirect(url_for('login'))
 
 @app.route('/myrecipes', methods=['GET', 'POST'])
-@login_required
+# @login_required
 def myRecipes():
     user = current_user.id
     receta = Recipe.query.filter_by(user_id=user).first()
     return render_template('profile.html', recipes=receta)
+
+if __name__ == "main":
+    app.run(debug=True)

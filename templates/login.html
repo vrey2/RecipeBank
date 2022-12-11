@@ -9,13 +9,13 @@
 {% block body %}
 <body>
     <h1>Welcome to The Recipe Bank!</h1>
-    <form method="POST" action="">
+    <form method="POST" action="/login">
         {{ form.hidden_tag() }}
-        {{ form.username }}
+        {{ wtf.form_field(form.username) }}
         <br>
-        {{ form.password }}
+        {{ wtf.form_field(form.password) }}
         <br>
-        {{ form.submit }}
+        {{ wtf.form_field(form.submit) }}
     </form>
     <br>
     <a href="{{ url_for('register') }}">Don't have an account? Sign Up</a>
